@@ -7,7 +7,7 @@ public class Meeting implements Comparable<Meeting> {
     public Meeting(String description, int startTime, int endTime, Priority priority) {
 
         if (startTime < EARLIEST_TIME) {
-            throw new IllegalArgumentException("Start and end time must be after 8:00");
+            throw new IllegalArgumentException("Start time must be after " + getTime(EARLIEST_TIME));
         }
 
         if (endTime < startTime) {
@@ -20,7 +20,7 @@ public class Meeting implements Comparable<Meeting> {
         this.priority = priority;
     }
 
-    public static final int EARLIEST_TIME = 60 * 8;
+    public static final int EARLIEST_TIME = 60 * 6;
 
     public String getDescription() {
         return description;
@@ -36,7 +36,7 @@ public class Meeting implements Comparable<Meeting> {
 
     public void setStartTime(int startTime) {
         if (startTime < EARLIEST_TIME) {
-            throw new IllegalArgumentException("Start and end time must be after 8:00");
+            throw new IllegalArgumentException("Start time must be after " + getTime(EARLIEST_TIME));
         }
 
         this.startTime = startTime;
