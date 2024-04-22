@@ -1,4 +1,5 @@
 import java.util.*;
+import java.time.LocalTime;
 
 public class Calendar {
     private final Map<Day, List<Meeting>> meetings;
@@ -22,16 +23,12 @@ public class Calendar {
         return meetings.get(day);
     }
 
-    public List<Meeting> getMeetings() {
-        List<Meeting> allMeetings = new ArrayList<>();
-        for (List<Meeting> dayMeetings : meetings.values()) {
-            allMeetings.addAll(dayMeetings);
-        }
-        return allMeetings;
+    public List<Meeting> getMeetings(Day day, Priority priority) {
+        return meetings.get(day).stream().filter((m) -> m.priority() == priority).toList();
     }
 
-    public List<Meeting> getMeetings(Day day, Priority priority) {
-        return meetings.get(day).stream().filter((m) -> m.getPriority() == priority).toList();
+    public List<Meeting> getMeetings(Day day, LocalTime time) {
+        return meetings.get(day).stream().filter((m) -> time.isBefore(m.startTime())).toList();
     }
 
     public void removeMeeting(Day day, Meeting meeting) {

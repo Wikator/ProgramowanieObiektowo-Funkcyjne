@@ -10,18 +10,12 @@ public class Main {
 
         boolean repeat = true;
         while (repeat) {
-            System.out.println("Add meeting [1]");
-            System.out.println("Remove meeting [2]");
-            System.out.println("Show meetings in a day [3]");
-            System.out.println("Show meetings in a day and priority [4]");
-            System.out.println("Show meetings in a day within start time [5]");
-            System.out.println("Seed meetings [6]");
-            System.out.println("Exit [7]");
+            printOptions();
 
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1 -> {
-                    enterDay();
+                    printEnterDay();
                     String day = scanner.next();
                     System.out.println("Enter meeting description:");
                     String description = scanner.next();
@@ -38,7 +32,7 @@ public class Main {
                 }
 
                 case 2 -> {
-                    enterDay();
+                    printEnterDay();
                     Day day = Day.valueOf(scanner.next());
                     List<Meeting> meetings = calendar.getMeetings(day);
                     System.out.println("Which meeting do you want to remove?");
@@ -50,41 +44,32 @@ public class Main {
                     calendar.removeMeeting(day, meetings.get(userInput));
                 }
                 case 3 -> {
-                    enterDay();
+                    printEnterDay();
                     String day = scanner.next();
                     List<Meeting> meetings = calendar.getMeetings(Day.valueOf(day));
-                    for (Meeting meeting : meetings.stream().sorted().toList()) {
-                        System.out.println(meeting);
-                    }
+                    printMeetings(meetings);
                 }
                 case 4 -> {
-                    enterDay();
+                    printEnterDay();
                     Day day = inputDay();
                     printEnterMeetingPriority();
                     Priority priority = inputPriority();
                     List<Meeting> meetings = calendar.getMeetings(day, priority);
-                    for (Meeting meeting : meetings.stream().sorted().toList()) {
-                        System.out.println(meeting);
-                    }
+                    printMeetings(meetings);
+                }
+                case 5 -> {
+                    printEnterDay();
+                    Day day = inputDay();
+                    System.out.println("Enter meeting start time (example: 08:20):");
+                    String startTimeString = scanner.next();
+                    LocalTime startTime = getTime(startTimeString);
+                    List<Meeting> meetings = calendar.getMeetings(day, startTime);
+                    printMeetings(meetings);
                 }
                 case 6 -> {
-                    enterDay();
+                    printEnterDay();
                     Day day = inputDay();
-                    Meeting meeting1 = new Meeting("Meeting 1", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.HIGH);
-                    Meeting meeting2 = new Meeting("Meeting 2", LocalTime.of(17, 0), LocalTime.of(22, 30), Priority.NORMAL);
-                    Meeting meeting3 = new Meeting("Meeting 3", LocalTime.of(14, 0), LocalTime.of(22, 30), Priority.HIGH);
-                    Meeting meeting4 = new Meeting("Meeting 4", LocalTime.of(9, 0), LocalTime.of(22, 30), Priority.HIGH);
-                    Meeting meeting5 = new Meeting("Meeting 5", LocalTime.of(10, 0), LocalTime.of(22, 30), Priority.NORMAL);
-                    Meeting meeting6 = new Meeting("Meeting 6", LocalTime.of(20, 0), LocalTime.of(22, 30), Priority.HIGH);
-                    Meeting meeting7 = new Meeting("Meeting 7", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.URGENT);
-
-                    calendar.addMeeting(day, meeting1);
-                    calendar.addMeeting(day, meeting2);
-                    calendar.addMeeting(day, meeting3);
-                    calendar.addMeeting(day, meeting4);
-                    calendar.addMeeting(day, meeting5);
-                    calendar.addMeeting(day, meeting6);
-                    calendar.addMeeting(day, meeting7);
+                    seedMeetings(day);
                 }
                 case 7 -> repeat = false;
                 default ->
@@ -98,7 +83,17 @@ public class Main {
         return LocalTime.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 
-    private static void enterDay() {
+    private static void printOptions() {
+        System.out.println("Add meeting [1]");
+        System.out.println("Remove meeting [2]");
+        System.out.println("Show meetings in a day [3]");
+        System.out.println("Show meetings in a day and priority [4]");
+        System.out.println("Show meetings in a day within start time [5]");
+        System.out.println("Seed meetings [6]");
+        System.out.println("Exit [7]");
+    }
+
+    private static void printEnterDay() {
         System.out.println("Enter day (MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY):");
     }
 
@@ -112,5 +107,29 @@ public class Main {
 
     private static Priority inputPriority() {
         return Priority.valueOf(scanner.next());
+    }
+
+    private static void seedMeetings(Day day) {
+        Meeting meeting1 = new Meeting("Meeting 1", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.HIGH);
+        Meeting meeting2 = new Meeting("Meeting 2", LocalTime.of(17, 0), LocalTime.of(22, 30), Priority.NORMAL);
+        Meeting meeting3 = new Meeting("Meeting 3", LocalTime.of(14, 0), LocalTime.of(22, 30), Priority.HIGH);
+        Meeting meeting4 = new Meeting("Meeting 4", LocalTime.of(9, 0), LocalTime.of(22, 30), Priority.HIGH);
+        Meeting meeting5 = new Meeting("Meeting 5", LocalTime.of(10, 0), LocalTime.of(22, 30), Priority.NORMAL);
+        Meeting meeting6 = new Meeting("Meeting 6", LocalTime.of(20, 0), LocalTime.of(22, 30), Priority.HIGH);
+        Meeting meeting7 = new Meeting("Meeting 7", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.URGENT);
+
+        calendar.addMeeting(day, meeting1);
+        calendar.addMeeting(day, meeting2);
+        calendar.addMeeting(day, meeting3);
+        calendar.addMeeting(day, meeting4);
+        calendar.addMeeting(day, meeting5);
+        calendar.addMeeting(day, meeting6);
+        calendar.addMeeting(day, meeting7);
+    }
+
+    private static void printMeetings(List<Meeting> meetings) {
+        for (Meeting meeting : meetings.stream().sorted().toList()) {
+            System.out.println(meeting);
+        }
     }
 }
