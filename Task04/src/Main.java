@@ -1,3 +1,4 @@
+import java.time.LocalTime;
 import java.util.*;
 
 public class Main {
@@ -28,7 +29,7 @@ public class Main {
                     String startTime = scanner.next();
                     System.out.println("Enter meeting end time (example: 08:20):");
                     String endTime = scanner.next();
-                    System.out.println("Enter meeting priority (NORMAL, HIGH, URGENT):");
+                    printEnterMeetingPriority();
                     String priority = scanner.next();
                     Meeting meeting = new Meeting(description, getTime(startTime), getTime(endTime),
                             Priority.valueOf(priority));
@@ -56,16 +57,26 @@ public class Main {
                         System.out.println(meeting);
                     }
                 }
+                case 4 -> {
+                    enterDay();
+                    Day day = inputDay();
+                    printEnterMeetingPriority();
+                    Priority priority = inputPriority();
+                    List<Meeting> meetings = calendar.getMeetings(day, priority);
+                    for (Meeting meeting : meetings.stream().sorted().toList()) {
+                        System.out.println(meeting);
+                    }
+                }
                 case 6 -> {
                     enterDay();
                     Day day = inputDay();
-                    Meeting meeting1 = new Meeting("Meeting 1", 7 * 60, 22 * 60, Priority.HIGH);
-                    Meeting meeting2 = new Meeting("Meeting 2", 17 * 60, 22 * 60, Priority.NORMAL);
-                    Meeting meeting3 = new Meeting("Meeting 3", 14 * 60, 22 * 60, Priority.HIGH);
-                    Meeting meeting4 = new Meeting("Meeting 4", 9 * 60, 22 * 60, Priority.HIGH);
-                    Meeting meeting5 = new Meeting("Meeting 5", 10 * 60, 22 * 60, Priority.NORMAL);
-                    Meeting meeting6 = new Meeting("Meeting 6", 20 * 60, 22 * 60, Priority.HIGH);
-                    Meeting meeting7 = new Meeting("Meeting 7", 7 * 60, 22 * 60, Priority.URGENT);
+                    Meeting meeting1 = new Meeting("Meeting 1", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.HIGH);
+                    Meeting meeting2 = new Meeting("Meeting 2", LocalTime.of(17, 0), LocalTime.of(22, 30), Priority.NORMAL);
+                    Meeting meeting3 = new Meeting("Meeting 3", LocalTime.of(14, 0), LocalTime.of(22, 30), Priority.HIGH);
+                    Meeting meeting4 = new Meeting("Meeting 4", LocalTime.of(9, 0), LocalTime.of(22, 30), Priority.HIGH);
+                    Meeting meeting5 = new Meeting("Meeting 5", LocalTime.of(10, 0), LocalTime.of(22, 30), Priority.NORMAL);
+                    Meeting meeting6 = new Meeting("Meeting 6", LocalTime.of(20, 0), LocalTime.of(22, 30), Priority.HIGH);
+                    Meeting meeting7 = new Meeting("Meeting 7", LocalTime.of(7, 0), LocalTime.of(22, 30), Priority.URGENT);
 
                     calendar.addMeeting(day, meeting1);
                     calendar.addMeeting(day, meeting2);
@@ -82,16 +93,24 @@ public class Main {
         }
     }
 
-    private static Integer getTime(String time) {
+    private static LocalTime getTime(String time) {
         String[] parts = time.split(":");
-        return Integer.parseInt(parts[0]) * 60 + Integer.parseInt(parts[1]);
+        return LocalTime.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 
     private static void enterDay() {
         System.out.println("Enter day (MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY):");
     }
 
+    private static void printEnterMeetingPriority() {
+        System.out.println("Enter meeting priority (NORMAL, HIGH, URGENT):");
+    }
+
     private static Day inputDay() {
         return Day.valueOf(scanner.next());
+    }
+
+    private static Priority inputPriority() {
+        return Priority.valueOf(scanner.next());
     }
 }

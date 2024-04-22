@@ -30,12 +30,8 @@ public class Calendar {
         return allMeetings;
     }
 
-    public List<Meeting> getMeetings(Priority priority) {
-        List<Meeting> allMeetings = new ArrayList<>();
-        for (List<Meeting> dayMeetings : meetings.values()) {
-            allMeetings.addAll(dayMeetings.stream().filter((m) -> m.getPriority() == priority).toList());
-        }
-        return allMeetings;
+    public List<Meeting> getMeetings(Day day, Priority priority) {
+        return meetings.get(day).stream().filter((m) -> m.getPriority() == priority).toList();
     }
 
     public void removeMeeting(Day day, Meeting meeting) {
