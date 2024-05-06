@@ -1,8 +1,19 @@
 import java.time.LocalTime;
 
-public record Meeting(String description, LocalTime startTime, LocalTime endTime,
-                      Priority priority) implements Comparable<Meeting> {
-    public Meeting {
+public class Meeting implements Comparable<Meeting> {
+
+    private final String description;
+    private final LocalTime startTime;
+    private final LocalTime endTime;
+    private final Priority priority;
+
+    public Meeting(String description, LocalTime startTime, LocalTime endTime,
+                   Priority priority) {
+
+        this.description = description;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.priority = priority;
 
         if (startTime.isBefore(EARLIEST_TIME)) {
             throw new IllegalArgumentException("Start time must be after " + EARLIEST_TIME);
@@ -15,6 +26,18 @@ public record Meeting(String description, LocalTime startTime, LocalTime endTime
     }
 
     public static final LocalTime EARLIEST_TIME = LocalTime.of(6, 0);
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
 
     @Override
     public String toString() {

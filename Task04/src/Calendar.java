@@ -1,5 +1,5 @@
 import java.util.*;
-import java.time.LocalTime;
+import java.util.function.Predicate;
 
 public class Calendar {
     private final Map<Day, List<Meeting>> meetings;
@@ -19,19 +19,23 @@ public class Calendar {
         meetings.get(day).add(meeting);
     }
 
+    public void removeMeeting(Day day, Meeting meeting) {
+        meetings.get(day).remove(meeting);
+    }
+
     public List<Meeting> getMeetings(Day day) {
         return meetings.get(day);
     }
 
-    public List<Meeting> getMeetings(Day day, Priority priority) {
-        return meetings.get(day).stream().filter((m) -> m.priority() == priority).toList();
-    }
+    public List<Meeting> getFilteredMeetings(Day day, Predicate<Meeting> predicate) {
+        // return meetings.get(day).stream().filter(predicate).toList();
 
-    public List<Meeting> getMeetings(Day day, LocalTime time) {
-        return meetings.get(day).stream().filter((m) -> time.isBefore(m.startTime())).toList();
-    }
-
-    public void removeMeeting(Day day, Meeting meeting) {
-        meetings.get(day).remove(meeting);
+        List<Meeting> filteredMeetings = new ArrayList<>();
+        for (Meeting meeting : getMeetings(day)) {
+            if (predicate.test(meeting)) {
+                filteredMeetings.add(meeting);
+            }
+        }
+        return filteredMeetings;
     }
 }
