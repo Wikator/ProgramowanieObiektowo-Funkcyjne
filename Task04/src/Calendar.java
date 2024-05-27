@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class Calendar {
-    private final Map<Day, List<Meeting>> meetings;
+    private final Map<Day, List<CalendarEntry>> meetings;
 
     public Calendar() {
         meetings = new HashMap<>();
@@ -15,27 +15,42 @@ public class Calendar {
         meetings.put(Day.SUNDAY, new ArrayList<>());
     }
 
-    public void addMeeting(Day day, Meeting meeting) {
-        meetings.get(day).add(meeting);
+    public void addEntry(Day day, CalendarEntry entry) {
+        meetings.get(day).add(entry);
     }
 
-    public void removeMeeting(Day day, Meeting meeting) {
-        meetings.get(day).remove(meeting);
+    public void removeEntry(Day day, CalendarEntry entry) {
+        meetings.get(day).remove(entry);
     }
 
     public List<Meeting> getMeetings(Day day) {
-        return meetings.get(day);
+        return getFilteredEntries(day, m -> m instanceof Meeting).stream()
+                .map(m -> (Meeting) m)
+                .toList();
+    }
+
+    public List<Task> getTasks(Day day) {
+        return getFilteredEntries(day, m -> m instanceof Task).stream()
+                .map(m -> (Task) m)
+                .toList();
     }
 
     public List<Meeting> getFilteredMeetings(Day day, Predicate<Meeting> predicate) {
-        // return meetings.get(day).stream().filter(predicate).toList();
+        return getFilteredEntries(day, m -> m instanceof Meeting).stream()
+                .map(m -> (Meeting) m)
+                .filter(predicate)
+                .toList();
+    }
 
-        List<Meeting> filteredMeetings = new ArrayList<>();
-        for (Meeting meeting : getMeetings(day)) {
-            if (predicate.test(meeting)) {
-                filteredMeetings.add(meeting);
-            }
-        }
-        return filteredMeetings;
+    public List<Task> getFilteredTasks(Day day, Predicate<Task> predicate) {
+        return getFilteredEntries(day, m -> m instanceof Task).stream()
+                .map(m -> (Task) m)
+                .filter(predicate)
+                .toList();
+    }
+
+
+    private List<CalendarEntry> getFilteredEntries(Day day, Predicate<CalendarEntry> predicate) {
+        return meetings.get(day).stream().filter(predicate).toList();
     }
 }

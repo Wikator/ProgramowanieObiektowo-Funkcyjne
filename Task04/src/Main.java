@@ -16,14 +16,17 @@ public class Main {
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1 -> addMeeting();
-                case 2 -> removeMeeting();
-                case 3 -> displayMeetingsInADay();
-                case 4 -> displayMeetingsInADayAndPriority();
-                case 5 -> displayMeetingsInADayAndStartTime();
-                case 6 -> displayMeetingsInADayAndTimeRange();
-                case 7 -> displayMeetingsInADayAndPriorityAndStartTime();
-                case 8 -> seedMeetings();
-                case 9 -> repeat = false;
+                case 2 -> addTask();
+                case 3 -> removeMeeting();
+                case 4 -> removeTask();
+                case 5 -> displayMeetingsInADay();
+                case 6 -> displayTasksInADay();
+                case 7 -> displayMeetingsInADayAndPriority();
+                case 8 -> displayTasksInADayAndStatus();
+                case 9 -> displayMeetingsInADayAndPriorityAndStartTime();
+                case 10 -> displayTasksInADayAndStatusAndEndTime();
+                case 11 -> seedMeetingsAndTasks();
+                case 12 -> repeat = false;
                 default -> System.out.println("Invalid choice");
             }
         }
@@ -33,8 +36,7 @@ public class Main {
 
     private static void addMeeting() {
         Day day = inputDay();
-        System.out.println("Enter meeting description:");
-        String description = getScanner().next();
+        String description = inputDescription();
         LocalTime startTime = inputTime();
         LocalTime endTime = inputTime();
         Priority priority = inputPriority();
@@ -42,9 +44,26 @@ public class Main {
         try {
             Meeting meeting = new Meeting(description, startTime, endTime, priority);
 
-            calendar.addMeeting(day, meeting);
+            calendar.addEntry(day, meeting);
         } catch (IllegalArgumentException ex) {
             System.out.println("Unable to add meeting. Ensure that start time is not before " + Meeting.EARLIEST_TIME +
+                    ", and start time is not after end time");
+        }
+    }
+
+    private static void addTask() {
+        Day day = inputDay();
+        String description = inputDescription();
+        LocalTime startTime = inputTime();
+        LocalTime endTime = inputTime();
+        Status status = inputStatus();
+
+        try {
+            Task task = new Task(description, startTime, endTime, status);
+
+            calendar.addEntry(day, task);
+        } catch (IllegalArgumentException ex) {
+            System.out.println("Unable to add task. Ensure that start time is not before " + Task.EARLIEST_TIME +
                     ", and start time is not after end time");
         }
     }
@@ -53,58 +72,69 @@ public class Main {
         Day day = inputDay();
         List<Meeting> meetings = calendar.getMeetings(day);
         System.out.println("Which meeting do you want to remove?");
-        for (int i = 0; i < meetings.size(); i++) {
-            System.out.println(i);
-            System.out.println(meetings.get(i));
-        }
+        printEntriesWithIndexes(meetings);
         int userInput = getScanner().nextInt();
-        calendar.removeMeeting(day, meetings.get(userInput));
+        calendar.removeEntry(day, meetings.get(userInput));
+    }
+
+    private static void removeTask() {
+        Day day = inputDay();
+        List<Task> tasks = calendar.getTasks(day);
+        System.out.println("Which task do you want to remove?");
+        printEntriesWithIndexes(tasks);
+        int userInput = getScanner().nextInt();
+        calendar.removeEntry(day, tasks.get(userInput));
     }
 
     private static void displayMeetingsInADay() {
         Day day = inputDay();
         List<Meeting> meetings = calendar.getMeetings(day);
-        printMeetings(meetings);
+        printEntries(meetings);
+    }
+
+    private static void displayTasksInADay() {
+        Day day = inputDay();
+        List<Task> tasks = calendar.getTasks(day);
+        printEntries(tasks);
     }
 
     private static void displayMeetingsInADayAndPriority() {
         Day day = inputDay();
         Priority priority = inputPriority();
         List<Meeting> meetings = calendar.getFilteredMeetings(day, (m) -> m.getPriority() == priority);
-        printMeetings(meetings);
+
+        printEntries(meetings);
     }
 
-    private static void displayMeetingsInADayAndStartTime() {
+    private static void displayTasksInADayAndStatus() {
         Day day = inputDay();
-        LocalTime startTime = inputTime();
-        Predicate<Meeting> predicate = (m) -> m.getStartTime().isAfter(startTime) || m.getStartTime().equals(startTime);
-        List<Meeting> meetings = calendar.getFilteredMeetings(day, predicate);
-        printMeetings(meetings);
-    }
+        Status status = inputStatus();
+        List<Task> tasks = calendar.getFilteredTasks(day, (t) -> t.getStatus() == status);
 
-    private static void displayMeetingsInADayAndTimeRange() {
-        Day day = inputDay();
-        LocalTime startTime = inputTime();
-        LocalTime endTime = inputTime();
-        Predicate<Meeting> predicate = (m) ->
-                (m.getStartTime().isAfter(startTime) || m.getStartTime().equals(startTime)) &&
-                        (m.getEndTime().isBefore(endTime) || m.getEndTime().equals(endTime));
-        List<Meeting> meetings = calendar.getFilteredMeetings(day, predicate);
-        printMeetings(meetings);
+        printEntries(tasks);
     }
 
     private static void displayMeetingsInADayAndPriorityAndStartTime() {
         Day day = inputDay();
-        Priority priority = inputPriority();
         LocalTime startTime = inputTime();
-        Predicate<Meeting> predicate = (m) ->
-                m.getPriority() == priority &&
-                        (m.getStartTime().isAfter(startTime) || m.getStartTime().equals(startTime));
+        Priority priority = inputPriority();
+        Predicate<Meeting> predicate = (m) -> (m.getStartTime().isAfter(startTime) || m.getStartTime().equals(startTime))
+                && m.getPriority() == priority;
         List<Meeting> meetings = calendar.getFilteredMeetings(day, predicate);
-        printMeetings(meetings);
+        printEntries(meetings);
     }
 
-    private static void seedMeetings() {
+    private static void displayTasksInADayAndStatusAndEndTime() {
+        Day day = inputDay();
+        LocalTime endTime = inputTime();
+        Status status = inputStatus();
+        Predicate<Task> predicate = (t) -> (t.getEndTime().isBefore(endTime) || t.getEndTime().equals(endTime))
+                && t.getStatus() == status;
+        List<Task> tasks = calendar.getFilteredTasks(day, predicate);
+        printEntries(tasks);
+    }
+
+    private static void seedMeetingsAndTasks() {
         Day day = inputDay();
 
         Meeting meeting1 = new Meeting("Meeting 1", LocalTime.of(7, 0), LocalTime.of(20, 30), Priority.HIGH);
@@ -115,18 +145,39 @@ public class Main {
         Meeting meeting6 = new Meeting("Meeting 6", LocalTime.of(20, 0), LocalTime.of(21, 45), Priority.HIGH);
         Meeting meeting7 = new Meeting("Meeting 7", LocalTime.of(7, 0), LocalTime.of(10, 10), Priority.URGENT);
 
-        calendar.addMeeting(day, meeting1);
-        calendar.addMeeting(day, meeting2);
-        calendar.addMeeting(day, meeting3);
-        calendar.addMeeting(day, meeting4);
-        calendar.addMeeting(day, meeting5);
-        calendar.addMeeting(day, meeting6);
-        calendar.addMeeting(day, meeting7);
+        Task task1 = new Task("Task 1", LocalTime.of(7, 0), LocalTime.of(20, 30), Status.PLANNED);
+        Task task2 = new Task("Task 2", LocalTime.of(17, 0), LocalTime.of(22, 30), Status.IN_PROGRESS);
+        Task task3 = new Task("Task 3", LocalTime.of(14, 0), LocalTime.of(22, 30), Status.COMPLETED);
+        Task task4 = new Task("Task 4", LocalTime.of(9, 0), LocalTime.of(14, 20), Status.PLANNED);
+        Task task5 = new Task("Task 5", LocalTime.of(10, 0), LocalTime.of(22, 30), Status.IN_PROGRESS);
+        Task task6 = new Task("Task 6", LocalTime.of(20, 0), LocalTime.of(21, 45), Status.COMPLETED);
+        Task task7 = new Task("Task 7", LocalTime.of(7, 0), LocalTime.of(10, 10), Status.COMPLETED);
+
+        calendar.addEntry(day, meeting1);
+        calendar.addEntry(day, meeting2);
+        calendar.addEntry(day, meeting3);
+        calendar.addEntry(day, meeting4);
+        calendar.addEntry(day, meeting5);
+        calendar.addEntry(day, meeting6);
+        calendar.addEntry(day, meeting7);
+
+        calendar.addEntry(day, task1);
+        calendar.addEntry(day, task2);
+        calendar.addEntry(day, task3);
+        calendar.addEntry(day, task4);
+        calendar.addEntry(day, task5);
+        calendar.addEntry(day, task6);
+        calendar.addEntry(day, task7);
     }
 
     //endregion
 
     //region Input methods
+
+    private static String inputDescription() {
+        System.out.println("Enter description:");
+        return getScanner().next();
+    }
 
     private static Day inputDay() {
         while (true) {
@@ -161,25 +212,44 @@ public class Main {
         }
     }
 
+    private static Status inputStatus() {
+        while (true) {
+            try {
+                System.out.println("Enter task status (PLANNED, CONFIRMED, IN_PROGRESS, COMPLETED):");
+                return Status.valueOf(getScanner().next());
+            } catch (IllegalArgumentException ex) {
+                System.out.println("Invalid status. Please enter a valid status");
+            }
+        }
+    }
+
     //endregion
 
     //region Print methods
 
     private static void printOptions() {
         System.out.println("Add meeting [1]");
-        System.out.println("Remove meeting [2]");
-        System.out.println("Show meetings in a day [3]");
-        System.out.println("Show meetings in a day and priority [4]");
-        System.out.println("Show meetings in a day within start time [5]");
-        System.out.println("Show meetings in a day within time range [6]");
-        System.out.println("Show meetings in a day with priority and within start time [7]");
-        System.out.println("Seed meetings [8]");
-        System.out.println("Exit [9]");
+        System.out.println("Add task [2]");
+        System.out.println("Remove meeting [3]");
+        System.out.println("Remove task [4]");
+        System.out.println("Show meetings in a day [5]");
+        System.out.println("Show tasks in a day [6]");
+        System.out.println("Show meetings in a day and priority [7]");
+        System.out.println("Show tasks in a day and status [8]");
+        System.out.println("Show meetings in a day, priority, and within start time [9]");
+        System.out.println("Show tasks in a day, status, and within end time [10]");
+        System.out.println("Seed meetings and tasks [11]");
+        System.out.println("Exit [12]");
     }
 
-    private static void printMeetings(List<Meeting> meetings) {
-        for (Meeting meeting : meetings.stream().sorted().toList()) {
-            System.out.println(meeting);
+    private static void printEntries(List<? extends CalendarEntry> entries) {
+        entries.stream().sorted().forEach(System.out::println);
+    }
+
+    private static void printEntriesWithIndexes(List<? extends CalendarEntry> entries) {
+        for (int i = 0; i < entries.size(); i++) {
+            System.out.println(i);
+            System.out.println(entries.get(i));
         }
     }
 

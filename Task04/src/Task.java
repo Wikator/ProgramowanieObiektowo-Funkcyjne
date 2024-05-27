@@ -1,26 +1,27 @@
 import java.time.LocalTime;
 
-public final class Meeting extends CalendarEntry {
-    private final Priority priority;
+public final class Task extends CalendarEntry {
 
-    public Meeting(String description, LocalTime startTime, LocalTime endTime,
-                   Priority priority) {
+    private final Status status;
 
+    public Task(String description, LocalTime startTime, LocalTime endTime, Status status) {
         super(startTime, endTime, description);
-        this.priority = priority;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.description = description;
+        this.status = status;
     }
 
-    public Priority getPriority() {
-        return priority;
+    public Status getStatus() {
+        return status;
     }
-
 
     @Override
     public String toString() {
         return "Description: " + this.description +
                 "\nStart time: " + startTime +
                 "\nEnd time: " + endTime +
-                "\nPriority: " + priority +
+                "\nStatus: " + status +
                 "\n";
     }
 
